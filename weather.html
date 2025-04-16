@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Weather</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link href="weather.css" rel="stylesheet">
+    </head>
+    <body>
+        <form class="weatherForm">
+            <input type="text" class="textbox" placeholder="Enter City">
+            <button class="formBtn" type="submit">Get weather</button><br>
+        </form>
+        <div class="weatherInfo">
+        </div>
+        </div>
+    </body>
+    <script>
+        const weatherForm = document.querySelector('.weatherForm');
+        const textbox = document.querySelector('.textbox');
+        const formBtn = document.querySelector('.formBtn');
+        const weatherInfo = document.querySelector('.weatherInfo'); //append the h1 city name before weatherStats div
+        const weatherStats = document.querySelector('.weatherStats');
+        const APIkey = '68d0eeecbb8618a73e485e7c51b54990';
+
+        async function getWeatherData(city){
+            let url;
+            if(/^\d{5}$/.test(city)){
+                url = `https://api.openweathermap.org/data/2.5/weather?zip=${city},us&appid=${APIkey}`
+            } else {
+                url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${APIkey}`
+            }
+            try{
+                const response = await fetch(url); 
+                if(!response.ok) displayError('City or zip code not in database')
+                const JSON = await response.json();
+                console.log(JSON)
+                const {name: country} = JSON;
+                displayWeatherData(JSON);
+                textbox.value = ''
+                return JSON;  
+            }
+            catch(error) {
+                displayError('City or zip code not in database')
+                textbox.value = '';
+            }
+            console.log(JSON);
+        }
+        function displayWeatherData(data){
+            const {name: city,
+                   wind: {speed: windSpeed, deg: degree},
+                   sys: {country: country},
+                   main: {temp: temp, humidity: humidity, feels_like: feels_like},
+                   weather: [{main: condition, id: id}],
+                   visibility: visibility,
+                   coord: {lat: lat, lon: lon}
+                } 
+            = data;
+
+            const cityElem = document.createElement('h1');
+            cityElem.textContent = `${city}, ${country}`;
+            cityElem.classList.add('city')
+            weatherInfo.appendChild(cityElem);
+
+            const weatherStatsElem = document.createElement('div');
+            weatherStatsElem.classList.add('weatherStats')
+            weatherInfo.appendChild(weatherStatsElem);
+
+            const tempElem = document.createElement('p');
+            tempElem.textContent = `Temperature: ${(1.8*(temp-273) + 32).toFixed(2)}°F`;
+            tempElem.classList.add('temp')
+            weatherStatsElem.appendChild(tempElem);
+
+            const weatherEmoji = getWeatherEmoji(id);
+            const conditionElem = document.createElement('p');
+            conditionElem.textContent = `${condition} ${weatherEmoji}`;
+            conditionElem.classList.add('condition')
+            weatherStatsElem.appendChild(conditionElem);
+
+            const humidityElem = document.createElement('p');
+            humidityElem.textContent = `Humidity: ${humidity}%`;
+            humidityElem.classList.add('humidity')
+            weatherStatsElem.appendChild(humidityElem);
+
+            const windElem = document.createElement('p');
+            windElem.textContent = `Wind: ${getWindDirection(degree)} ${Math.round(windSpeed * 2.237)}mph`;
+            windElem.classList.add('wind')
+            weatherStatsElem.appendChild(windElem);
+
+            const feelsLikeElem = document.createElement('p');
+            feelsLikeElem.textContent = `Feels like: ${(1.8*(feels_like-273) + 32).toFixed(2)}°F`;
+            feelsLikeElem.classList.add('feelsLike');
+            weatherStatsElem.appendChild(feelsLikeElem);
+
+            const visibilityElem = document.createElement('p');
+            visibilityElem.textContent = `Visibility: ${visibility / 1000}km`;
+            visibilityElem.classList.add('visibility');
+            weatherStatsElem.appendChild(visibilityElem);
+            
+            const latitudeElem = document.createElement('p');
+            latitudeElem.textContent = `Latitude: ${lat}`;
+            latitudeElem.classList.add('latitude');
+            weatherStatsElem.appendChild(latitudeElem);
+
+            const longtitudeElem = document.createElement('p');
+            longtitudeElem.textContent = `Longtitude: ${lon}`;
+            longtitudeElem.classList.add('longtitude');
+            weatherStatsElem.appendChild(longtitudeElem);
+        }
+
+        function getWindDirection(degree) {
+            if (degree >= 337.5 || degree < 22.5) return "N";
+            if (degree >= 22.5 && degree < 67.5) return "NE";
+            if (degree >= 67.5 && degree < 112.5) return "E";
+            if (degree >= 112.5 && degree < 157.5) return "SE";
+            if (degree >= 157.5 && degree < 202.5) return "S";
+            if (degree >= 202.5 && degree < 247.5) return "SW";
+            if (degree >= 247.5 && degree < 292.5) return "W";
+            if (degree >= 292.5 && degree < 337.5) return "NW";
+        }
+        function getWeatherEmoji(id){
+            switch(true){
+                case id >= 200 && id < 300:
+                    return '⛈️'
+                    break;
+                case id >= 300 && id < 400:
+                    return '🌧️'
+                    break
+                case id >= 500 && id < 600:
+                    return '🌧️'
+                    break;
+                case id >= 600 && id < 700:
+                    return '❄️'
+                    break;
+                case id >= 700 && id < 800:
+                    return '🌫️'
+                    break;
+                case id === 800:
+                    return '☀️'
+                    break;
+                case id >= 801 && id < 810:
+                    return '☁️'
+                    break;
+                default:
+                    return '❓';
+            }
+        }
+        function displayError(message){
+            console.error(message)
+            const errorMsg = document.createElement('p');
+            errorMsg.textContent = message;
+            weatherInfo.textContent = ''
+            weatherInfo.appendChild(errorMsg)
+        }
+        weatherForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const city = textbox.value.toLowerCase();
+            if(city) {
+                getWeatherData(city);
+                weatherInfo.textContent = ''
+            } else {
+                displayError('Please enter a city')
+            }
+        })
+    </script>
+</html>

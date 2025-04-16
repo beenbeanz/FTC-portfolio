@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Snake</title>
+    </head>
+    <body>
+        <h1 id="title">Snake</h1>
+        <canvas id="board" width="600" height="600"></canvas>
+        <h3 id="lost"></h3>
+        <h3 id="score"></h3>
+        <button type="reset" id="resetBtn">Reset</button>
+
+        <style>
+            body{
+                text-align: center;
+                font-family:sans-serif;
+            }
+            #title{
+                text-align: center;
+                font-size:35px;
+            }
+            #board{
+                border: 5px solid black;
+                background-color: chartreuse;
+                background: url('snakeBackground.jpg') no-repeat center center;
+                background-size: cover;
+            }
+            #lost{
+                color:red;
+                font-size:30px;
+            }
+            #score{
+                font-size: 24px;
+            }
+            #resetBtn{
+                width: 100px;
+                height:40px;
+                font-size: 20px;
+                border-radius: 5px;
+                background-color: black;
+                color: white;
+                border: none;
+            }
+        </style>
+
+        <script>
+            const canvas = document.getElementById("board");
+            const context = canvas.getContext('2d');
+            const lost = document.getElementById("lost");
+            const scoreDisplay = document.getElementById("score");
+            const resetBtn = document.getElementById("resetBtn");
+            const boardWidth = canvas.width;
+            const boardHeight = canvas.height;
+            const squareSize = 40;
+            let snake = [
+                {x:squareSize*4,y:squareSize},
+                {x:squareSize*3,y:squareSize},
+                {x:squareSize*2,y:squareSize},
+                {x:squareSize,y:squareSize},
+                {x:0,y:squareSize}
+            ];
+            let foodX, foodY, interval;
+            let score = 0;
+            let running = false;
+            let direction = 'ArrowRight'; //initial direction
+            const ySpeed = 0;
+            const xSpeed = squareSize;
+              
+            window.addEventListener("keydown", snakeDirection);
+            resetBtn.addEventListener("click", reset);
+            startGame();
+
+            function startGame(){
+                running = true;
+                food();
+                if(running){
+                    clearInterval(interval);
+                    interval = setInterval(() => {
+                        context.clearRect(0, 0, boardWidth, boardHeight);
+                        drawSnake();
+                        drawFood();
+                        moveSnake();
+                    }, 75)
+                } else {
+                    gameEnd();
+                };
+            }
+            function food(){
+                //while not in valid position, keep generating food 
+                let validPos;
+                while(!validPos){
+                    foodX = Math.floor(Math.random() * (boardWidth / squareSize)) * squareSize; 
+                    foodY = Math.floor(Math.random() * (boardHeight / squareSize)) * squareSize;
+                    validPos = true;
+                    for (let i = 0; i < snake.length; i++) {
+                        if(foodX == snake[i].x && foodY == snake[i].y){
+                            validPos = false;
+                            break;
+                        }
+                    }
+                }
+                drawFood();
+            }
+            function drawFood(){
+                context.fillStyle = "red";
+                context.fillRect(foodX, foodY, squareSize, squareSize);
+            }
+            function drawSnake(){
+                context.fillStyle = "yellow";
+                context.strokeStyle = "black";
+                snake.forEach(part => {
+                    context.fillRect(part.x, part.y, squareSize, squareSize);
+                    context.strokeRect(part.x, part.y, squareSize, squareSize);
+                });
+            } 
+            function snakeDirection(e){
+                switch(e.key){
+                    case "ArrowUp":
+                        if(direction !== 'ArrowDown') direction = 'ArrowUp';
+                        break;
+                    case "ArrowDown":
+                        if(direction !== 'ArrowUp') direction = 'ArrowDown';
+                        break;
+                    case "ArrowLeft":
+                        if(direction !== 'ArrowRight') direction = 'ArrowLeft'
+                        break;
+                    case "ArrowRight":
+                        if(direction !== 'ArrowLeft') direction = 'ArrowRight';
+                        break;
+                }
+            }
+            function moveSnake(){
+                //carbon copy of head
+                const newHead = {...snake[0]};
+                switch(direction){
+                    case "ArrowUp":
+                        newHead.y -= squareSize;
+                        break;
+                    case "ArrowDown":
+                        newHead.y += squareSize;
+                        break;
+                    case "ArrowLeft":
+                        newHead.x -= squareSize;
+                        break;
+                    case "ArrowRight":
+                        newHead.x += squareSize;
+                        break;
+                }
+                //if it eats food, doesn't pop
+                snake.unshift(newHead);
+                if(snake[0].x == foodX && snake[0].y == foodY){
+                    score++;
+                    food();
+                } else snake.pop();
+                checkBounds();
+                drawSnake();
+            }
+            function checkBounds(){
+                //if over border
+                if(snake[0].x >= boardWidth|| snake[0].x < 0 || snake[0].y < 0 || snake[0].y >= boardHeight){
+                    running = false;
+                    gameEnd();
+                }
+                //if snake eats itself
+                for(i = 1; i < snake.length; i++){
+                    if(snake[0].x == snake[i].x && snake[0].y == snake[i].y){
+                        running = false;
+                        gameEnd();
+                    }
+                }
+            }
+            function gameEnd(){
+                clearInterval(interval);
+                lost.textContent = "YOU LOST";
+                scoreDisplay.style.visibility = 'visible';
+                scoreDisplay.textContent = `Score: ${score}`
+                lost.style.visibility = 'visible';
+            }
+            function reset(){
+                clearInterval(interval);
+                score = 0;
+                scoreDisplay.style.visibility = 'hidden';
+                lost.style.visibility = 'hidden';
+                direction = "ArrowRight";
+                snake = [
+                    {x:squareSize*4,y:squareSize},
+                    {x:squareSize*3,y:squareSize},
+                    {x:squareSize*2,y:squareSize},
+                    {x:squareSize,y:squareSize},
+                    {x:0,y:squareSize}
+                ]; //reset snake position
+                startGame();
+            }
+        </script>
+    </body>
+</html>

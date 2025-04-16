@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="clock.css" rel="stylesheet">
+    <title>Clock</title>
+</head>
+<body>
+    <div id="btnDiv">
+        <h2 id="h2">Choose Service:</h2>
+        <button type="button" id="clockBtn" onclick="displayClock()">Clock</button>
+        <button type="button" id="stopwatchBtn" onclick="displayStopwatch()">Stopwatch</button>
+    </div>
+    <script>    
+        const titlePage = document.getElementById('btnDiv');
+
+        function displayClock(){
+            titlePage.style.display = 'none';
+            const clockDiv = document.createElement('div');
+            clockDiv.id = 'clock';
+            const text = document.createElement('p');
+            text.id = 'clockText';
+            const info = document.createElement('p');
+            info.id = 'infoText';
+            clockDiv.appendChild(text);
+            clockDiv.appendChild(info);
+            document.body.appendChild(clockDiv);
+
+            setInterval(clock, 100);
+            function clock(){
+                const newDate = new Date();
+                const hourD = newDate.getHours();
+                const hour = hourD > 12 ? hourD - 12 : hourD;
+                const minute = newDate.getMinutes();
+                const second = newDate.getSeconds();
+                const dayOrNight = hourD > 12 ? 'PM' : 'AM';
+                const dayIndex = newDate.getDay();
+                const daysArr = ["Sunday", "Monday", 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']; 
+                const day = daysArr[dayIndex];
+                const monthIndex = newDate.getMonth()
+                const monthsArr = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];      
+                const month = monthsArr[monthIndex];      
+                const date = newDate.getDate();
+                const year = newDate.getFullYear();
+
+                text.innerHTML = `${pad(hour)} : ${pad(minute)} : ${pad(second)} <span id='dayOrNight'>${dayOrNight}</span>`;
+                info.innerHTML = `${day} <span id='dateSpan'>${month} ${date} ${year}</span>`;
+                
+                function pad(number){
+                    return (number < 10 ? "0" : "") + number;
+                }
+            }
+        }
+
+        function displayStopwatch(){
+            titlePage.style.display = 'none';
+            const clockDiv = document.createElement('div');
+            clockDiv.id = 'clock';
+            const btnContainer = document.createElement('div');
+            btnContainer.id = 'btnContainer';
+            const timeText = document.createElement('p');
+            timeText.id = 'timeText';
+            timeText.textContent = '00:00:00:00';
+            const lapContainer = document.createElement('div');
+            lapContainer.id = 'lapContainer';
+            lapContainer.style.display = 'none';
+            const startBtn = document.createElement('button');
+            startBtn.id = 'startBtn';
+            startBtn.textContent = 'Start';
+            const stopBtn = document.createElement('button');
+            stopBtn.id = 'stopBtn';
+            stopBtn.textContent = 'Stop';
+            const resetBtn = document.createElement('button');
+            resetBtn.id = 'resetBtn';
+            resetBtn.textContent = 'Reset';
+            const lapBtn = document.createElement('button');
+            lapBtn.id = 'lapBtn';
+            lapBtn.textContent = 'Lap';
+            clockDiv.appendChild(timeText);
+            btnContainer.appendChild(startBtn);
+            btnContainer.appendChild(stopBtn);
+            btnContainer.appendChild(resetBtn);
+            btnContainer.appendChild(lapBtn);
+            clockDiv.appendChild(lapContainer);
+            clockDiv.appendChild(btnContainer);
+            document.body.appendChild(clockDiv);
+ 
+            stopwatch();
+            function stopwatch(){
+                let startTime = 0 
+                let elapsedTime = 0;
+                let interval;
+                let lapsArr = [];
+                let i = 1;
+                let running = false;
+
+                function updateStopwatch(){
+                    let currentTime = new Date().getTime();
+                    elapsedTime = currentTime - startTime;
+                    const hours = Math.floor(elapsedTime / (1000 * 60 * 60));
+                    const minutes = Math.floor(elapsedTime / (1000 * 60)) % 60;
+                    const seconds = Math.floor(elapsedTime / 1000) % 60;
+                    const milliseconds = Math.floor((elapsedTime % 1000) / 10);
+                    timeText.innerText = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}:${pad(milliseconds)}`;
+                }
+                function startStopwatch(){
+                    if(!running){
+                        startTime = new Date().getTime() - elapsedTime;
+                        interval = setInterval(updateStopwatch, 15);
+                        running = true;
+                    }
+                }
+                function stopStopwatch(){
+                    if(running){
+                        clearInterval(interval);
+                        elapsedTime = new Date().getTime() - startTime;
+                        running = false;
+                    }
+                }
+                function resetStopwatch(){
+                        clearInterval(interval);
+                        timeText.innerText = "00:00:00:00";
+                        lapContainer.style.display = 'none';
+                        lapContainer.innerHTML = '';
+                        lapsArr = [];
+                        i = 0;
+                        startTime = 0;
+                        elapsedTime = 0;
+                        running = false;
+                }
+                function lapStopwatch(){
+
+                    lapContainer.style.display = 'block';
+                    const hours = Math.floor(elapsedTime / (1000 * 60 * 60));
+                    const minutes = Math.floor(elapsedTime / (1000 * 60)) % 60;
+                    const seconds = Math.floor(elapsedTime / 1000) % 60;
+                    const milliseconds = Math.floor((elapsedTime % 1000) / 10);
+                    let a = `Lap ${i}: ${pad(hours)}:${pad(minutes)}:${pad(seconds)}:${pad(milliseconds)}`;
+                    i++;
+                    lapsArr.push(a);
+                    if(lapsArr.length > 5) lapsArr.shift();
+                    lapContainer.innerHTML = lapsArr.join('<br>');
+                }
+                function pad(number){
+                    return (number < 10 ? "0" : "") + number;
+                }
+                startBtn.addEventListener('click', startStopwatch);
+                stopBtn.addEventListener('click', stopStopwatch);
+                resetBtn.addEventListener('click', resetStopwatch);
+                lapBtn.addEventListener('click', lapStopwatch);
+            }
+       }
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,98 @@
+*{
+    user-select: none;
+}
+body{
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: black;
+    scroll-behavior: smooth;
+}
+#btnDiv{
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    display: flex;
+    margin-top: 15%;
+    visibility: visible;
+}
+h2{
+    color: lime;
+    font-size: 75px;
+}
+button{
+    font-size: 45px;
+    padding: 8px;
+    margin: 0 20px;
+    border-radius: 5px;
+    border: none;
+}
+button:hover{
+    cursor: pointer;
+    transition: 0.3s ease
+}
+/* clock styling */
+#clock{
+    border-radius: 4px;
+    height: 100%;
+    justify-content: center;
+    text-align: center;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    background-color: black;
+}
+#clockText{
+    color: lime;
+    font-size: 200px;
+    text-align: center;
+    justify-content: center;
+    display: block;
+    padding: 0;
+    margin: 0;
+}
+#infoText{
+    color: lime;
+    font-size: 50px;
+    margin: 0;
+    justify-content: center;
+    display: block;
+    text-align: center;
+}
+#dayOrNight{
+    font-size: 75px;
+    padding-left: 0;
+}
+#dateSpan{
+    padding-left: 25px;
+}
+/* stopwatch styling */
+.unitLabel{
+    color: lime;
+    margin: 0;
+    padding: 0;
+}
+#labels{
+    display: flex;
+    margin:0;
+    padding-bottom: 50px;
+    justify-content: center;
+    gap: 200px;
+}
+#timeText{
+    color: lime;
+    font-size: 200px;
+    margin-bottom: 0px;
+}
+#lapContainer{
+    color: lime;
+    width: 950px;
+    height: 310px;
+    margin: 0;
+    font-size: 40px;
+}
+#btnContainer{
+    display: block;
+    align-items: center;
+    padding: auto;
+    justify-content: center;
+}
